@@ -17,7 +17,7 @@ const getModel = () => {
   }
 
   return client.getGenerativeModel({
-    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
     generationConfig: {
       responseMimeType: 'application/json',
     },
