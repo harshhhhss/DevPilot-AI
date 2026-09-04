@@ -17,6 +17,7 @@ const taskRoutes = require('./taskRoutes');
 const bugRoutes = require('./bugRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const meetingRoutes = require('./meetingRoutes');
+const activityRoutes = require('./activityRoutes');
 
 const router = express.Router();
 
@@ -37,5 +38,6 @@ router.use('/:projectId/tasks', taskRoutes);
 router.use('/:projectId/bugs', bugRoutes);
 router.use('/:projectId/analytics', analyticsRoutes);
 router.use('/:projectId/meetings', meetingRoutes);
+router.use('/:projectId/activity', activityRoutes);
 
 module.exports = router;

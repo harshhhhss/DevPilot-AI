@@ -4,6 +4,7 @@ const Task = require('../models/Task');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { canViewProject, canManageProject } = require('../utils/accessControl');
+const { logActivity } = require('../services/activityService');
 
 const loadProject = async (projectId) => {
   const project = await Project.findById(projectId);
@@ -50,6 +51,15 @@ const createSprint = asyncHandler(async (req, res) => {
     createdBy: req.user._id,
   });
 
+  await logActivity({
+    projectId: project._id,
+    userId: req.user._id,
+    action: 'SPRINT_CREATED',
+    entityType: 'Sprint',
+    entityId: sprint._id,
+    meta: { name: sprint.name },
+  });
+
   res.status(201).json({ success: true, data: sprint });
 });
 
@@ -68,6 +78,17 @@ const updateSprint = asyncHandler(async (req, res) => {
   if (endDate !== undefined) sprint.endDate = endDate;
 
   await sprint.save();
+
+  if (status !== undefined) {
+    await logActivity({
+      projectId: project._id,
+      userId: req.user._id,
+      action: 'SPRINT_STATUS_CHANGED',
+      entityType: 'Sprint',
+      entityId: sprint._id,
+      meta: { status: sprint.status },
+    });
+  }
 
   res.status(200).json({ success: true, data: sprint });
 });

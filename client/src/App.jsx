@@ -1,95 +1,75 @@
-import { useEffect, useState } from 'react';
-import api from './services/api';
-
-const statusCopy = {
-  checking: 'Checking backend connection...',
-  connected: 'Backend connected',
-  error: 'Backend not reachable',
-};
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import Dashboard from './pages/Dashboard';
+import ProjectsList from './pages/projects/ProjectsList';
+import ProjectDetailLayout from './pages/projects/ProjectDetailLayout';
+import ProjectOverview from './pages/projects/ProjectOverview';
+import ProjectSprints from './pages/projects/ProjectSprints';
+import ProjectKanban from './pages/projects/ProjectKanban';
+import ProjectBugs from './pages/projects/ProjectBugs';
+import ProjectMeetings from './pages/projects/ProjectMeetings';
+import ProjectTeam from './pages/projects/ProjectTeam';
+import ProjectAnalytics from './pages/projects/ProjectAnalytics';
+import TasksList from './pages/tasks/TasksList';
+import TaskDetail from './pages/tasks/TaskDetail';
+import BugsList from './pages/bugs/BugsList';
+import BugDetail from './pages/bugs/BugDetail';
+import AIAssistant from './pages/AIAssistant';
+import Team from './pages/Team';
+import Analytics from './pages/Analytics';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
+import Admin from './pages/Admin';
+import NotFound from './pages/NotFound';
+import AppLayout from './components/layout/AppLayout';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+import { ROLES } from './utils/roles';
 
 function App() {
-  const [apiStatus, setApiStatus] = useState('checking');
-  const [health, setHealth] = useState(null);
-
-  useEffect(() => {
-    const checkApi = async () => {
-      try {
-        const response = await api.get('/health');
-        setHealth(response.data.data);
-        setApiStatus('connected');
-      } catch (error) {
-        setApiStatus('error');
-      }
-    };
-
-    checkApi();
-  }, []);
-
   return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-mark">D</span>
-          <div>
-            <strong>DevPilot AI</strong>
-            <span>Project OS</span>
-          </div>
-        </div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-        <nav className="nav-list" aria-label="Main navigation">
-          {['Dashboard', 'Projects', 'Sprints', 'Tasks', 'Kanban', 'Bugs', 'AI Assistant'].map((item) => (
-            <a href="/" key={item}>
-              {item}
-            </a>
-          ))}
-        </nav>
-      </aside>
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
 
-      <section className="workspace">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Foundation setup</p>
-            <h1>Build software work from one calm command center.</h1>
-          </div>
-          <span className={`status-pill ${apiStatus}`}>{statusCopy[apiStatus]}</span>
-        </header>
+          <Route path="/projects" element={<ProjectsList />} />
+          <Route path="/projects/:id" element={<ProjectDetailLayout />}>
+            <Route index element={<ProjectOverview />} />
+            <Route path="sprints" element={<ProjectSprints />} />
+            <Route path="kanban" element={<ProjectKanban />} />
+            <Route path="bugs" element={<ProjectBugs />} />
+            <Route path="meetings" element={<ProjectMeetings />} />
+            <Route path="team" element={<ProjectTeam />} />
+            <Route path="analytics" element={<ProjectAnalytics />} />
+          </Route>
 
-        <section className="dashboard-grid" aria-label="Foundation status">
-          <article className="metric-card">
-            <span>API Service</span>
-            <strong>{health?.service || 'devpilot-ai-api'}</strong>
-          </article>
-          <article className="metric-card">
-            <span>Environment</span>
-            <strong>{health?.environment || 'development'}</strong>
-          </article>
-          <article className="metric-card">
-            <span>Database</span>
-            <strong>{health?.database || 'pending'}</strong>
-          </article>
-        </section>
+          <Route path="/tasks" element={<TasksList />} />
+          <Route path="/tasks/:id" element={<TaskDetail />} />
 
-        <section className="kanban-preview" aria-label="Sprint workflow preview">
-          {['To Do', 'In Progress', 'In Review', 'Done'].map((column) => (
-            <div className="kanban-column" key={column}>
-              <h2>{column}</h2>
-              <div className="task-card">
-                <span>{column === 'To Do' ? 'Phase 1' : 'Upcoming'}</span>
-                <strong>
-                  {column === 'To Do'
-                    ? 'Backend foundation'
-                    : column === 'In Progress'
-                      ? 'Authentication module'
-                      : column === 'In Review'
-                        ? 'Role-based routes'
-                        : 'Health API'}
-                </strong>
-              </div>
-            </div>
-          ))}
-        </section>
-      </section>
-    </main>
+          <Route path="/bugs" element={<BugsList />} />
+          <Route path="/bugs/:id" element={<BugDetail />} />
+
+          <Route path="/ai-assistant" element={<AIAssistant />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
+
+          <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
+            <Route path="/admin" element={<Admin />} />
+          </Route>
+        </Route>
+      </Route>
+
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
