@@ -33,17 +33,107 @@ DevPilot AI combines conventional software project management — projects, spri
 
 ## Architecture
 
-```
-Browser (React SPA)  ──HTTPS/REST──▶  Express API  ──Mongoose──▶  MongoDB
-        ▲                                  │
-        └───────────WebSocket (Socket.IO)──┘
-                                            │
-                                       Gemini API (server-side only)
+DevPilot AI follows the **layered (presentation / application / persistence) architecture** specified in the SRS, with AI orchestration deliberately isolated inside the application tier so provider credentials never reach the browser and every AI response is validated before it can touch project data.
+
+```mermaid
+flowchart TB
+    subgraph Client["Presentation Tier — client/ (React 18 + Vite)"]
+        UI["Pages & Components<br/>(Kanban, Bugs, Sprints, AI Assistant, Analytics, Admin)"]
+        CTX["Context / Hooks<br/>(AuthContext, SocketContext)"]
+        SVC["services/*.js<br/>(Axios REST wrappers)"]
+    end
+
+    subgraph API["Application Tier — server/ (Node.js + Express)"]
+        MW["Middleware<br/>(JWT auth, RBAC, rate limit, helmet, error handler)"]
+        CTRL["Controllers<br/>(one per resource)"]
+        BSVC["Services<br/>(aiService, notificationService, activityService)"]
+        SOCK["Socket.IO server<br/>(room-scoped: project:&lt;id&gt;)"]
+    end
+
+    subgraph Data["Persistence Tier"]
+        DB[("MongoDB<br/>via Mongoose")]
+    end
+
+    EXT["Google Gemini API<br/>(server-side key only)"]
+
+    UI --> CTX --> SVC
+    SVC -->|"HTTPS/REST, JWT bearer"| MW --> CTRL
+    CTRL --> BSVC
+    CTRL -->|Mongoose| DB
+    BSVC -->|Mongoose| DB
+    BSVC -->|"HTTPS (backend-only)"| EXT
+    CTX <-->|WebSocket| SOCK
+    SOCK <-->|Mongoose| DB
 ```
 
+**Request flow (typical CRUD):** `client/src/services/*.js` (Axios) → JWT attached from `AuthContext` → Express `protect`/`authorize` middleware validates the token and role → controller enforces resource-level access (`server/utils/accessControl.js`, always scoped to `req.user.organization` for multi-tenancy) → Mongoose model → MongoDB. Mutations that other users need to see immediately (task/bug status, comments, chat) also emit a Socket.IO event to the relevant `project:<id>` room.
+
+**AI request flow (CON-03 / CON-04 / CON-08):** frontend calls `POST /api/v1/ai/*` with a bearer token → `aiController.js` checks role/project access → `server/services/aiService.js` builds the prompt, calls Gemini, and strictly parses/validates the JSON response → on success, the **draft** is returned to the client for human review (never auto-saved) and logged to the `AIRequest` collection for audit; on a missing key, provider outage, or malformed response, the service throws a typed `ApiError` (502/503) instead of fabricating a result, and the frontend surfaces a toast and falls back to manual entry.
+
 - The **presentation tier** (`client/`) only renders and calls the API — it never talks to MongoDB or Gemini directly.
-- The **application tier** (`server/`) owns authentication, authorization, domain logic, and all outbound AI calls. AI prompts/response-parsing live in `server/services/aiService.js`, called only from `server/controllers/aiController.js`, which audit-logs every request/response to the `AIRequest` collection and never lets a malformed AI response silently corrupt data — the endpoint fails clearly (503/502) so the frontend falls back to manual entry.
-- The **persistence tier** is MongoDB via Mongoose.
+- The **application tier** (`server/`) owns authentication, authorization, domain logic, and all outbound AI calls.
+- The **persistence tier** is MongoDB via Mongoose, with role- and organization-scoped queries enforced at the controller layer on every route.
+
+**Deviation from the SRS deployment diagram:** the SRS specifies a containerized production topology (NGINX reverse proxy, two API replicas sharing state via Redis, a 3-member MongoDB replica set). This implementation runs as a single Express instance suitable for local/demo deployment — see [Known Limitations](#known-limitations--deviations-from-the-srs).
+
+## Requirements
+
+Traced from the project's SRS (Section 3, Functional Requirements; Section 5, Non-Functional Requirements). "Status" reflects what's actually implemented in this codebase, not just what was specified.
+
+### Functional Requirements
+
+| ID | Requirement | Actor | Status | Implementation |
+|---|---|---|---|---|
+| FR-01 | Register with name/email/password/organization; authenticate via JWT sessions | All users | ✅ Done | `authController.js` (`register`/`login`), `models/User.js`, `models/Organization.js`, `utils/generateToken.js` |
+| FR-02 | Enforce RBAC (Manager, Developer/Tester, Administrator, Viewer) on every protected route | System | ✅ Done | `middleware/authMiddleware.js` (`protect`, `authorize`), `utils/accessControl.js`, `utils/roles.js` — checked server-side on every route, never trusted from the client |
+| FR-03 | Manager creates/edits/archives projects and defines sprints with start/end dates | Manager | ✅ Done | `controllers/projectController.js`, `controllers/sprintController.js` |
+| FR-04 | Manager enters a natural-language sprint goal and receives an AI-generated backlog | Manager | ✅ Done | `POST /api/v1/ai/sprint-plan` → `aiController.js` → `aiService.js` (Gemini) |
+| FR-05 | Manager can edit/merge/split/delete any AI-generated story/subtask before it's committed | Manager | ✅ Done | AI output is returned as an editable draft in the UI (`AIAssistant.jsx` / sprint planner flow); nothing is written to MongoDB until the Manager explicitly saves (CON-08) |
+| FR-06 | AI-assisted priority score from deadline proximity, dependencies, and velocity | System | ✅ Done | `POST /api/v1/ai/prioritize-task` — reads task deadline, dependencies, and sprint context and returns a recommended priority + rationale |
+| FR-07 | Real-time Kanban board (To Do / In Progress / In Review / Done) | Dev/Tester | ✅ Done | `components/kanban/*` (`@dnd-kit`), `taskController.js`, Socket.IO broadcasts board updates to `project:<id>` rooms |
+| FR-08 | Log, assign, and track bugs by severity (Low/Medium/High/Critical) and status | Dev/Tester | ✅ Done | `models/Bug.js`, `bugController.js`, `pages/projects/ProjectBugs.jsx` |
+| FR-09 | Real-time chat and contextual comments via Socket.IO with notifications | All users | ✅ Done | `socket/index.js`, `components/chat/ChatPanel.jsx`, `commentController.js`, `notificationService.js` — Stakeholders are read-only per the RBAC matrix (5.2) |
+| FR-10 | Summarize meeting notes into an AI-generated summary with convertible action items | All users | ✅ Done | `POST /api/v1/ai/summarize-meeting`, `meetingController.js` (`convertActionItem` turns an action item into a real `Task`) |
+| FR-11 | Analytics dashboard with velocity, bug trends, and an AI risk score | Manager, Viewer | ✅ Done | `analyticsController.js`, `pages/Dashboard.jsx` / `ProjectAnalytics.jsx` (Recharts), `POST /api/v1/ai/analyze-risk` |
+| FR-12 | Administrator manages user accounts, roles, and the configured AI provider API key | Administrator | ⚠️ Partial | `pages/Admin.jsx` + `userController.js` cover account/role/status management. The AI provider key is configured via `server/.env` (`GEMINI_API_KEY`), **not** an in-app admin UI — deliberately, so the key is never transmitted through the browser at all |
+
+### Non-Functional Requirements
+
+**Performance (SRS §5.1)** — targets apply under normal load and exclude the external AI provider's own response time. These are the design targets; no formal load-testing pass has been run against them yet.
+
+| ID | Operation | Target |
+|---|---|---|
+| NFR-01 | Standard CRUD (task/bug/project update) | Under 1s, excluding network latency |
+| NFR-02 | AI sprint plan generation | Under 15s, excluding provider response time |
+| NFR-03 | AI task prioritization pass | Under 10s for up to 200 backlog items |
+| NFR-04 | Meeting summarization | Under 12s for input up to 10,000 characters |
+| NFR-05 | Real-time chat and board update delivery | Under 2s to all connected clients |
+| NFR-06 | Concurrent users per deployment instance | At least 200 |
+
+**Security (SRS §5.2):**
+
+- JWTs (RFC 7519), passwords hashed with `bcryptjs`. **Deviation:** the SRS specifies 15-minute access tokens with 7-day rotating refresh tokens; this implementation uses a single 7-day JWT for simplicity (see [Known Limitations](#known-limitations--deviations-from-the-srs)).
+- RBAC enforced **server-side on every protected route**, never in the UI alone — the UI hides/disables actions a role can't take, but the API independently re-checks and rejects them.
+- The SRS's resource/action × role matrix is enforced as follows, all server-verified:
+
+  | Resource / Action | Manager | Dev/Tester | Admin | Viewer |
+  |---|---|---|---|---|
+  | Create/archive project, define sprint | Allow | Deny | Allow | Deny |
+  | Invoke AI planning & prioritization | Allow | Deny | Allow | Deny |
+  | Update task status on board | Allow | Allow (assigned) | Allow | Deny |
+  | Log, assign, resolve bugs | Allow | Allow | Allow | Deny |
+  | Post chat messages & comments | Allow | Allow | Allow | Deny |
+  | View analytics and risk score | Allow | Allow | Allow | Allow |
+  | Manage users, roles, AI provider key | Deny | Deny | Allow | Deny |
+
+**Software Quality Attributes (SRS §5.3):**
+
+| Attribute | Target | Notes |
+|---|---|---|
+| Reliability | 99.5% monthly uptime; a failed AI request never loses user input | AI failures throw a clean `ApiError` (502/503) rather than corrupting state; any text the user typed stays in the form |
+| Maintainability | Prompt/scoring logic isolated from CRUD logic; ≥80% unit test coverage | Isolation achieved (`server/services/aiService.js` is the only file that talks to Gemini). **No automated test suite exists yet** — see [Future Enhancements](#future-enhancements) |
+| Scalability | Horizontal scaling from <10 to 1,000+ users | Not yet implemented — current deployment is a single stateless-ish Express instance; horizontal scaling needs the Redis Socket.IO adapter noted below |
+| Usability | A first-time Manager can create a project and generate an AI plan within 10 minutes | Achieved in practice via the seeded demo project and the guided AI Sprint Planner flow |
 
 ## Folder Structure
 
