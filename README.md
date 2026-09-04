@@ -88,24 +88,7 @@ cd ../client && npm install
 
 ### 2. Configure environment variables
 
-Copy each `.env.example` to `.env` and fill in real values (never commit `.env`):
-
-**`server/.env`**
-```env
-PORT=5000
-MONGO_URI=mongodb://127.0.0.1:27017/devpilot_ai
-JWT_SECRET=replace_this_with_a_long_random_secret
-JWT_EXPIRE=7d
-CLIENT_URL=http://localhost:5173
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.0-flash
-```
-
-**`client/.env`**
-```env
-VITE_API_URL=http://localhost:5000/api/v1
-VITE_SOCKET_URL=http://localhost:5000
-```
+Create a `server/.env` and a `client/.env` file (both are git-ignored — never commit them). The backend needs its port, database connection string, JWT secret/expiry, allowed client origin, and your Gemini API key/model; the frontend needs the backend API URL and Socket.IO URL. See `server/config/db.js`, `server/server.js`, and `client/src/services/api.js` for the exact variable names each reads.
 
 ### 3. Seed demo data (recommended)
 
