@@ -5,8 +5,11 @@ import Badge from '../common/Badge';
 import Avatar from '../common/Avatar';
 import { formatDate } from '../../utils/format';
 
-export default function TaskCard({ task, onClick }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task._id });
+export default function TaskCard({ task, onClick, canDrag = true }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task._id,
+    disabled: !canDrag,
+  });
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -22,7 +25,10 @@ export default function TaskCard({ task, onClick }) {
       {...listeners}
       {...attributes}
       onClick={() => onClick(task)}
-      className="cursor-grab space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
+      title={canDrag ? undefined : "You can't move this card — you're not the assignee, manager, or admin"}
+      className={`space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm transition-shadow hover:shadow-md ${
+        canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+      }`}
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium leading-snug text-slate-800">{task.title}</p>

@@ -12,6 +12,7 @@ const TABS = [
   { to: 'sprints', label: 'Sprints' },
   { to: 'kanban', label: 'Kanban' },
   { to: 'bugs', label: 'Bugs' },
+  { to: 'chat', label: 'Chat' },
   { to: 'meetings', label: 'AI Meetings' },
   { to: 'team', label: 'Team' },
   { to: 'analytics', label: 'Analytics' },

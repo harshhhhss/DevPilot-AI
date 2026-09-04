@@ -14,6 +14,7 @@ import RoleGate from '../../components/common/RoleGate';
 import TaskDetailPanel from '../../components/tasks/TaskDetailPanel';
 import { SkeletonRows } from '../../components/common/Skeleton';
 import { MANAGING_ROLES } from '../../utils/roles';
+import { useAuth } from '../../hooks/useAuth';
 
 function NewTaskModal({ open, onClose, projectId, sprints, onCreated }) {
   const [form, setForm] = useState({ title: '', sprint: '' });
@@ -77,6 +78,7 @@ function NewTaskModal({ open, onClose, projectId, sprints, onCreated }) {
 
 export default function ProjectKanban() {
   const { project } = useOutletContext();
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,6 +137,16 @@ export default function ProjectKanban() {
 
   const visibleTasks = sprintFilter ? tasks.filter((t) => t.sprint === sprintFilter || t.sprint?._id === sprintFilter) : tasks;
 
+  // Mirrors the backend's canChangeStatus check so a card only looks
+  // draggable when the drop would actually be accepted, instead of letting
+  // anyone drag and then snapping the card back with an error toast.
+  const canDragTask = (task) => {
+    const isAdmin = user.role === 'Admin';
+    const isThisProjectManager = String(project.manager?._id) === String(user._id);
+    const isAssignee = task.assignee && String(task.assignee._id || task.assignee) === String(user._id);
+    return isAdmin || isThisProjectManager || Boolean(isAssignee);
+  };
+
   if (loading) return <SkeletonRows count={4} />;
 
   return (
@@ -154,7 +166,12 @@ export default function ProjectKanban() {
         </RoleGate>
       </div>
 
-      <KanbanBoard tasks={visibleTasks} onTaskClick={setSelectedTask} onStatusChange={handleStatusChange} />
+      <KanbanBoard
+        tasks={visibleTasks}
+        onTaskClick={setSelectedTask}
+        onStatusChange={handleStatusChange}
+        canDragTask={canDragTask}
+      />
 
       <Modal open={Boolean(selectedTask)} onClose={() => setSelectedTask(null)} title="Task Details" size="lg">
         {selectedTask && (

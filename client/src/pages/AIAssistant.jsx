@@ -129,7 +129,9 @@ function MeetingTool({ projectId }) {
             <ul className="list-inside list-disc text-sm text-slate-600">
               {result.actionItems.map((item, i) => (
                 <li key={i}>
-                  {item.description} {item.assigneeName && <span className="text-slate-400">— {item.assigneeName}</span>}
+                  {item.description}
+                  {item.assigneeName && <span className="text-slate-400"> — {item.assigneeName}</span>}
+                  {item.deadline && <span className="text-slate-400"> (due {item.deadline})</span>}
                 </li>
               ))}
             </ul>

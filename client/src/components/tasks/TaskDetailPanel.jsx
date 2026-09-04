@@ -11,7 +11,7 @@ import Select from '../common/Select';
 import AIBadge from '../common/AIBadge';
 import RoleGate from '../common/RoleGate';
 import { PRIORITIES, TASK_STATUSES } from '../../utils/constants';
-import { MANAGING_ROLES } from '../../utils/roles';
+import { MANAGING_ROLES, ROLES } from '../../utils/roles';
 import { useAuth } from '../../hooks/useAuth';
 import { formatDate, formatRelativeTime } from '../../utils/format';
 
@@ -208,6 +208,9 @@ export default function TaskDetailPanel({ task, onUpdate, onDelete, assignableUs
             </div>
           ))}
         </div>
+        {user.role === ROLES.STAKEHOLDER ? (
+          <p className="mt-3 text-xs text-slate-400">Stakeholders have read-only access to comments.</p>
+        ) : (
         <form onSubmit={handleComment} className="mt-3 flex items-center gap-2">
           <input
             value={commentText}
@@ -219,6 +222,7 @@ export default function TaskDetailPanel({ task, onUpdate, onDelete, assignableUs
             <Send size={13} />
           </Button>
         </form>
+        )}
       </div>
     </div>
   );

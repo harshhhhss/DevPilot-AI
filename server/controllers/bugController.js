@@ -2,7 +2,8 @@ const Bug = require('../models/Bug');
 const Project = require('../models/Project');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
-const { canViewProject, canManageProject, isAdmin } = require('../utils/accessControl');
+const { canViewProject, canManageProject, getAccessibleProjectIds } = require('../utils/accessControl');
+const { CONTRIBUTOR_ROLES } = require('../utils/roles');
 const { notify } = require('../services/notificationService');
 const { logActivity } = require('../services/activityService');
 const { emitToProject } = require('../socket');
@@ -26,8 +27,13 @@ const listBugs = asyncHandler(async (req, res) => {
     const project = await loadProject(req.params.projectId);
     if (!canViewProject(project, req.user)) throw new ApiError(403, 'Forbidden');
     filter.project = project._id;
-  } else if (!isAdmin(req.user)) {
+  } else if (CONTRIBUTOR_ROLES.includes(req.user.role)) {
+    // Developer/Tester: bugs they reported or are assigned to fix.
     filter.$or = [{ reporter: req.user._id }, { assignedDeveloper: req.user._id }];
+  } else {
+    // Admin/Manager/Stakeholder: every bug across projects they can access,
+    // scoped to their own organization (Admin included — never cross-tenant).
+    filter.project = { $in: await getAccessibleProjectIds(Project, req.user) };
   }
 
   if (req.query.status) filter.status = req.query.status;

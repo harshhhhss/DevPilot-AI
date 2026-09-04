@@ -5,6 +5,7 @@ const Project = require('../models/Project');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { canViewProject } = require('../utils/accessControl');
+const { ROLES } = require('../utils/roles');
 const { notifyMany } = require('../services/notificationService');
 const { emitToProject } = require('../socket');
 
@@ -62,6 +63,11 @@ const createComment = asyncHandler(async (req, res) => {
 
   const { entity, project } = await loadEntityAndProject(entityType, entityId);
   if (!canViewProject(project, req.user)) throw new ApiError(403, 'Forbidden');
+
+  // SRS 5.2: "Post chat messages & comments" is Allow for Manager/Dev/Tester/Admin, Deny for Viewer.
+  if (req.user.role === ROLES.STAKEHOLDER) {
+    throw new ApiError(403, 'Forbidden: stakeholders have read-only access');
+  }
 
   const mentions = resolveMentions(content, project);
 

@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import TaskCard from './TaskCard';
 import { TASK_STATUS_LABELS } from '../../utils/constants';
 
-export default function KanbanColumn({ status, tasks, onTaskClick }) {
+export default function KanbanColumn({ status, tasks, onTaskClick, canDragTask }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -18,7 +18,7 @@ export default function KanbanColumn({ status, tasks, onTaskClick }) {
         }`}
       >
         {tasks.map((task) => (
-          <TaskCard key={task._id} task={task} onClick={onTaskClick} />
+          <TaskCard key={task._id} task={task} onClick={onTaskClick} canDrag={canDragTask ? canDragTask(task) : true} />
         ))}
         {tasks.length === 0 && (
           <div className="flex-1 rounded-lg border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400">

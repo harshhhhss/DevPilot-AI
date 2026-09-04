@@ -128,7 +128,9 @@ export default function ProjectMeetings() {
                 <ul className="space-y-1 text-sm text-slate-600">
                   {draft.actionItems.map((item, i) => (
                     <li key={i}>
-                      {item.description} {item.assigneeName && <span className="text-slate-400">— {item.assigneeName}</span>}
+                      {item.description}
+                      {item.assigneeName && <span className="text-slate-400"> — {item.assigneeName}</span>}
+                      {item.deadline && <span className="text-slate-400"> (due {item.deadline})</span>}
                     </li>
                   ))}
                 </ul>
@@ -161,6 +163,7 @@ export default function ProjectMeetings() {
                       <span className="text-slate-700">
                         {item.description}
                         {item.assigneeName && <span className="text-slate-400"> — {item.assigneeName}</span>}
+                        {item.deadline && <span className="text-slate-400"> (due {item.deadline})</span>}
                       </span>
                       {item.convertedToTask ? (
                         <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">

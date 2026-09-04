@@ -8,6 +8,7 @@ import ProjectOverview from './pages/projects/ProjectOverview';
 import ProjectSprints from './pages/projects/ProjectSprints';
 import ProjectKanban from './pages/projects/ProjectKanban';
 import ProjectBugs from './pages/projects/ProjectBugs';
+import ProjectChat from './pages/projects/ProjectChat';
 import ProjectMeetings from './pages/projects/ProjectMeetings';
 import ProjectTeam from './pages/projects/ProjectTeam';
 import ProjectAnalytics from './pages/projects/ProjectAnalytics';
@@ -43,6 +44,7 @@ function App() {
             <Route path="sprints" element={<ProjectSprints />} />
             <Route path="kanban" element={<ProjectKanban />} />
             <Route path="bugs" element={<ProjectBugs />} />
+            <Route path="chat" element={<ProjectChat />} />
             <Route path="meetings" element={<ProjectMeetings />} />
             <Route path="team" element={<ProjectTeam />} />
             <Route path="analytics" element={<ProjectAnalytics />} />

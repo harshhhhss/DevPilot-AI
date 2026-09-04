@@ -2,7 +2,7 @@ import { DndContext, PointerSensor, useSensor, useSensors, closestCorners } from
 import KanbanColumn from './KanbanColumn';
 import { TASK_STATUSES } from '../../utils/constants';
 
-export default function KanbanBoard({ tasks, onTaskClick, onStatusChange }) {
+export default function KanbanBoard({ tasks, onTaskClick, onStatusChange, canDragTask }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleDragEnd = (event) => {
@@ -26,6 +26,7 @@ export default function KanbanBoard({ tasks, onTaskClick, onStatusChange }) {
             status={status}
             tasks={tasks.filter((t) => t.status === status)}
             onTaskClick={onTaskClick}
+            canDragTask={canDragTask}
           />
         ))}
       </div>

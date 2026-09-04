@@ -110,13 +110,21 @@ export default function Admin() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <Select value={u.role} onChange={(role) => handleRoleChange(u._id, role)} options={ALL_ROLES} className="text-xs" />
+                    {String(u._id) === String(currentUser._id) ? (
+                      <span className="text-xs text-slate-400" title="You can't change your own role">
+                        {u.role}
+                      </span>
+                    ) : (
+                      <Select value={u.role} onChange={(role) => handleRoleChange(u._id, role)} options={ALL_ROLES} className="text-xs" />
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <button
                       type="button"
                       onClick={() => handleStatusToggle(u)}
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      disabled={String(u._id) === String(currentUser._id)}
+                      title={String(u._id) === String(currentUser._id) ? "You can't deactivate your own account" : undefined}
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-60 ${
                         u.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
                       }`}
                     >

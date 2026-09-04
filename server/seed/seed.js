@@ -35,6 +35,10 @@ const daysFromNow = (n) => {
   return d;
 };
 
+// Meeting action item deadlines are free text (see Meeting model), so format
+// dates going into them as plain YYYY-MM-DD rather than passing Date objects.
+const dateLabel = (n) => daysFromNow(n).toISOString().slice(0, 10);
+
 const run = async () => {
   await connectDB();
 
@@ -273,9 +277,9 @@ const run = async () => {
       'Team reviewed Sprint 2 progress; the Stripe checkout decline bug is the primary blocker and carries schedule risk if unresolved by Friday.',
     keyDecisions: ['Diego owns the Stripe decline bug through Thursday.', 'Maya finishes tax calculation logic by Wednesday.'],
     actionItems: [
-      { description: 'Fix Stripe decline handling on checkout', assignee: dev1._id, assigneeName: 'Diego Developer', deadline: daysFromNow(2) },
-      { description: 'Finish cart tax calculation logic', assignee: dev2._id, assigneeName: 'Maya Coder', deadline: daysFromNow(1) },
-      { description: 'Draft QA test plan for checkout', assignee: tester._id, assigneeName: 'Tariq Tester', deadline: daysFromNow(3) },
+      { description: 'Fix Stripe decline handling on checkout', assignee: dev1._id, assigneeName: 'Diego Developer', deadline: dateLabel(2) },
+      { description: 'Finish cart tax calculation logic', assignee: dev2._id, assigneeName: 'Maya Coder', deadline: dateLabel(1) },
+      { description: 'Draft QA test plan for checkout', assignee: tester._id, assigneeName: 'Tariq Tester', deadline: dateLabel(3) },
     ],
     discussionPoints: ['Risk of missing sprint end date if Stripe bug persists past Friday.'],
     createdBy: manager._id,

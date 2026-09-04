@@ -36,6 +36,10 @@ const updateUserRole = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Invalid role');
   }
 
+  if (String(req.params.id) === String(req.user._id)) {
+    throw new ApiError(400, 'You cannot change your own role — ask another admin to do it');
+  }
+
   const user = await User.findById(req.params.id);
   if (!user) throw new ApiError(404, 'User not found');
 
@@ -48,6 +52,10 @@ const updateUserRole = asyncHandler(async (req, res) => {
 // PUT /api/v1/users/:id/status — Admin only, activate/deactivate an account.
 const updateUserStatus = asyncHandler(async (req, res) => {
   const { isActive } = req.body;
+
+  if (String(req.params.id) === String(req.user._id)) {
+    throw new ApiError(400, 'You cannot deactivate your own account');
+  }
 
   const user = await User.findById(req.params.id);
   if (!user) throw new ApiError(404, 'User not found');

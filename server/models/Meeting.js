@@ -29,7 +29,10 @@ const meetingSchema = new mongoose.Schema(
         description: { type: String, required: true },
         assignee: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
         assigneeName: { type: String, default: '' },
-        deadline: { type: Date, default: null },
+        // Free text, not a Date: deadlines extracted from meeting notes are
+        // often relative/fuzzy ("Friday", "end of sprint") and can't always
+        // be resolved to a precise calendar date.
+        deadline: { type: String, default: '' },
         convertedToTask: { type: mongoose.Schema.Types.ObjectId, ref: 'Task', default: null },
       },
     ],

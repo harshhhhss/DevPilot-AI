@@ -1,6 +1,9 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Project = require('../models/Project');
+const { canViewProject } = require('../utils/accessControl');
+const { ROLES } = require('../utils/roles');
 
 let io = null;
 
@@ -43,16 +46,29 @@ const initSocket = (httpServer) => {
     const userId = socket.user._id.toString();
     socket.join(`user:${userId}`);
 
-    socket.on('project:join', (projectId) => {
-      if (projectId) socket.join(`project:${projectId}`);
+    // Rooms carry project-scoped chat/comment/task/bug broadcasts, so joining
+    // one is only allowed for users who can actually view that project —
+    // otherwise anyone authenticated could eavesdrop on any project's room.
+    const isProjectMember = async (projectId) => {
+      const project = await Project.findById(projectId).select('manager members organization');
+      return Boolean(project) && canViewProject(project, socket.user);
+    };
+
+    socket.on('project:join', async (projectId) => {
+      if (projectId && (await isProjectMember(projectId))) {
+        socket.join(`project:${projectId}`);
+      }
     });
 
     socket.on('project:leave', (projectId) => {
       if (projectId) socket.leave(`project:${projectId}`);
     });
 
-    socket.on('chat:message', ({ projectId, content }) => {
+    socket.on('chat:message', async ({ projectId, content }) => {
       if (!projectId || !content?.trim()) return;
+      // SRS 5.2: chat/comments are Deny for Viewer (Stakeholder).
+      if (socket.user.role === ROLES.STAKEHOLDER) return;
+      if (!(await isProjectMember(projectId))) return;
 
       const payload = {
         projectId,
