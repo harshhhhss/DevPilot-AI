@@ -9,8 +9,10 @@ import Badge from '../../components/common/Badge';
 import AIBadge from '../../components/common/AIBadge';
 import RoleGate from '../../components/common/RoleGate';
 import ActivityFeed from '../../components/common/ActivityFeed';
+import ProgressRing from '../../components/common/ProgressRing';
 import aiService from '../../services/aiService';
 import { getErrorMessage } from '../../services/api';
+import { aiToast } from '../../utils/aiToast';
 import { MANAGING_ROLES } from '../../utils/roles';
 import { formatDateTime } from '../../utils/format';
 
@@ -22,7 +24,7 @@ export default function ProjectOverview() {
     setAnalyzing(true);
     try {
       await aiService.analyzeRisk({ projectId: project._id });
-      toast.success('Risk analysis updated');
+      aiToast('Risk analysis updated');
       reload();
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -36,9 +38,13 @@ export default function ProjectOverview() {
       <div className="space-y-5 lg:col-span-2">
         <Card className="p-5">
           <h3 className="mb-3 text-sm font-semibold text-slate-900">Progress</h3>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <ProgressRing value={project.progress} label="complete" />
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-brand-600" style={{ width: `${project.progress}%` }} />
+              <div
+                className="h-full rounded-full bg-brand-600 transition-[width] duration-700 ease-out"
+                style={{ width: `${project.progress}%` }}
+              />
             </div>
             <span className="text-sm font-medium text-slate-600">{project.progress}%</span>
           </div>

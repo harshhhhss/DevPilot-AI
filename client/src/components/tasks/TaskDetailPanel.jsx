@@ -10,6 +10,7 @@ import Button from '../common/Button';
 import Select from '../common/Select';
 import AIBadge from '../common/AIBadge';
 import RoleGate from '../common/RoleGate';
+import { aiToast } from '../../utils/aiToast';
 import { PRIORITIES, TASK_STATUSES } from '../../utils/constants';
 import { MANAGING_ROLES, ROLES } from '../../utils/roles';
 import { useAuth } from '../../hooks/useAuth';
@@ -60,6 +61,7 @@ export default function TaskDetailPanel({ task, onUpdate, onDelete, assignableUs
     try {
       const { data } = await aiService.prioritizeTask({ taskId: task._id });
       onUpdate({ ...task, aiSuggestedPriority: data.suggestedPriority, aiPriorityReason: data.reason });
+      aiToast('Priority suggestion ready');
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {

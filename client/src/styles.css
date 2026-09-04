@@ -5,6 +5,14 @@
 @layer base {
   :root {
     color-scheme: light;
+    --toast-bg: #ffffff;
+    --toast-fg: #0f172a;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --toast-bg: #1e293b;
+    --toast-fg: #f1f5f9;
   }
 
   html,
@@ -16,6 +24,19 @@
   body {
     @apply bg-slate-50 text-slate-900 antialiased;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .dark body {
+    background-color: #0f172a;
+    color: #f1f5f9;
+  }
+
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background-color: #1e293b;
+    color: #f1f5f9;
   }
 }
 
@@ -30,10 +51,191 @@
     border-radius: 9999px;
   }
 
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(71 85 105);
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+}
+
+/*
+ * Dark theme overrides, applied globally by cascade.
+ *
+ * Most of the app's ~50 page/component files use literal light-mode
+ * Tailwind utility classes (bg-white, text-slate-900, etc.) rather than
+ * per-component dark: variants. Rather than touching every file, this
+ * block re-targets those exact class names with a `.dark` ancestor
+ * selector. Because `.dark .bg-white` (specificity 0,2,0) is always more
+ * specific than the bare `.bg-white` utility (0,1,0), these rules apply
+ * everywhere the class is used, automatically, without React changes.
+ */
+.dark .bg-white {
+  background-color: #1e293b;
+}
+.dark .bg-slate-50 {
+  background-color: #0f172a;
+}
+.dark .bg-slate-100,
+.dark .bg-slate-100\/70 {
+  background-color: #334155;
+}
+.dark .bg-slate-200,
+.dark .bg-slate-200\/80 {
+  background-color: #475569;
+}
+.dark .bg-slate-900\/50 {
+  background-color: rgb(2 6 23 / 0.7);
+}
+.dark .border-slate-100,
+.dark .border-slate-200 {
+  border-color: #334155;
+}
+.dark .border-slate-300 {
+  border-color: #475569;
+}
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #334155;
+}
+.dark .text-slate-900 {
+  color: #f1f5f9;
+}
+.dark .text-slate-800 {
+  color: #e2e8f0;
+}
+.dark .text-slate-700 {
+  color: #cbd5e1;
+}
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+.dark .text-slate-400 {
+  color: #64748b;
+}
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #334155;
+}
+.dark .hover\:border-slate-200:hover,
+.dark .hover\:border-slate-300:hover {
+  border-color: #475569;
+}
+.dark .hover\:text-slate-600:hover {
+  color: #cbd5e1;
+}
+.dark .hover\:text-slate-700:hover,
+.dark .hover\:text-slate-800:hover {
+  color: #e2e8f0;
+}
+.dark .hover\:text-slate-900:hover {
+  color: #ffffff;
+}
+
+/* Status/priority/severity badge tints (bg-*-50/100 + text-*-600/700/800 + border-*-200) */
+.dark .bg-blue-50,
+.dark .bg-blue-100 {
+  background-color: rgb(30 58 138 / 0.4);
+}
+.dark .text-blue-700 {
+  color: #93c5fd;
+}
+.dark .border-blue-200 {
+  border-color: rgb(59 130 246 / 0.4);
+}
+
+.dark .bg-amber-50,
+.dark .bg-amber-100 {
+  background-color: rgb(120 53 15 / 0.4);
+}
+.dark .text-amber-600 {
+  color: #fbbf24;
+}
+.dark .text-amber-700 {
+  color: #fcd34d;
+}
+.dark .text-amber-800 {
+  color: #fde68a;
+}
+.dark .border-amber-200 {
+  border-color: rgb(217 119 6 / 0.4);
+}
+.dark .hover\:text-amber-900:hover {
+  color: #fef3c7;
+}
+
+.dark .bg-rose-50,
+.dark .bg-rose-100 {
+  background-color: rgb(136 19 55 / 0.4);
+}
+.dark .text-rose-600 {
+  color: #fb7185;
+}
+.dark .text-rose-700 {
+  color: #fda4af;
+}
+.dark .border-rose-200 {
+  border-color: rgb(225 29 72 / 0.4);
+}
+.dark .hover\:bg-rose-50:hover {
+  background-color: rgb(136 19 55 / 0.4);
+}
+.dark .hover\:text-rose-600:hover {
+  color: #fda4af;
+}
+
+.dark .bg-emerald-50,
+.dark .bg-emerald-100 {
+  background-color: rgb(6 78 59 / 0.4);
+}
+.dark .text-emerald-600 {
+  color: #34d399;
+}
+.dark .text-emerald-700 {
+  color: #6ee7b7;
+}
+.dark .border-emerald-200 {
+  border-color: rgb(5 150 105 / 0.4);
+}
+
+.dark .bg-violet-50,
+.dark .bg-violet-50\/40,
+.dark .bg-violet-50\/50,
+.dark .bg-violet-100 {
+  background-color: rgb(76 29 149 / 0.35);
+}
+.dark .text-violet-500,
+.dark .text-violet-600 {
+  color: #a78bfa;
+}
+.dark .text-violet-700 {
+  color: #c4b5fd;
+}
+.dark .border-violet-100,
+.dark .border-violet-200 {
+  border-color: rgb(109 40 217 / 0.4);
+}
+
+.dark .bg-brand-50,
+.dark .bg-brand-50\/40 {
+  background-color: rgb(31 55 209 / 0.35);
+}
+.dark .text-brand-600 {
+  color: #8db5ff;
+}
+.dark .text-brand-700 {
+  color: #bcd3ff;
+}
+.dark .border-brand-200 {
+  border-color: rgb(37 71 236 / 0.4);
+}
+.dark .hover\:bg-brand-50:hover {
+  background-color: rgb(31 55 209 / 0.45);
+}
+.dark .hover\:text-brand-700:hover {
+  color: #bcd3ff;
 }

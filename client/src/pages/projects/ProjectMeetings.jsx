@@ -10,6 +10,8 @@ import Button from '../../components/common/Button';
 import AIBadge from '../../components/common/AIBadge';
 import EmptyState from '../../components/common/EmptyState';
 import { SkeletonRows } from '../../components/common/Skeleton';
+import TypewriterText from '../../components/common/TypewriterText';
+import { aiToast } from '../../utils/aiToast';
 import { formatDate } from '../../utils/format';
 
 export default function ProjectMeetings() {
@@ -36,6 +38,7 @@ export default function ProjectMeetings() {
     try {
       const { data } = await aiService.summarizeMeeting({ projectId: project._id, notes });
       setDraft(data);
+      aiToast('Meeting summarized — review before saving');
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {

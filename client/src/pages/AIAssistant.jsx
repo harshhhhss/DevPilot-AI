@@ -9,6 +9,8 @@ import Button from '../components/common/Button';
 import Select from '../components/common/Select';
 import AIBadge from '../components/common/AIBadge';
 import RoleGate from '../components/common/RoleGate';
+import TypewriterText from '../components/common/TypewriterText';
+import { aiToast } from '../utils/aiToast';
 import { MANAGING_ROLES } from '../utils/roles';
 
 const TABS = [
@@ -27,6 +29,7 @@ function UserStoryTool({ projectId }) {
     try {
       const { data } = await aiService.generateUserStory({ projectId: projectId || undefined, featureDescription });
       setResult(data);
+      aiToast('User story drafted');
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
@@ -54,7 +57,9 @@ function UserStoryTool({ projectId }) {
       {result && (
         <div className="space-y-3 rounded-lg border border-violet-100 bg-violet-50/40 p-4">
           <AIBadge label="AI-generated draft — review and edit before saving" />
-          <p className="text-sm font-medium text-slate-800">{result.userStory}</p>
+          <p className="text-sm font-medium text-slate-800">
+            <TypewriterText text={result.userStory} />
+          </p>
           {result.acceptanceCriteria?.length > 0 && (
             <div>
               <p className="text-xs font-medium text-slate-600">Acceptance criteria</p>
@@ -98,6 +103,7 @@ function MeetingTool({ projectId }) {
     try {
       const { data } = await aiService.summarizeMeeting({ projectId: projectId || undefined, notes });
       setResult(data);
+      aiToast('Meeting summarized');
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
@@ -124,7 +130,9 @@ function MeetingTool({ projectId }) {
       {result && (
         <div className="space-y-3 rounded-lg border border-violet-100 bg-violet-50/40 p-4">
           <AIBadge label="AI-generated draft — review and edit before saving" />
-          <p className="text-sm text-slate-700">{result.summary}</p>
+          <p className="text-sm text-slate-700">
+            <TypewriterText text={result.summary} />
+          </p>
           {result.actionItems?.length > 0 && (
             <ul className="list-inside list-disc text-sm text-slate-600">
               {result.actionItems.map((item, i) => (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import activityService from '../../services/activityService';
 import Avatar from './Avatar';
 import { formatRelativeTime, titleCase } from '../../utils/format';
@@ -31,8 +32,14 @@ export default function ActivityFeed({ projectId, limit = 15 }) {
 
   return (
     <div className="space-y-3">
-      {items.map((item) => (
-        <div key={item._id} className="flex items-start gap-2.5">
+      {items.map((item, i) => (
+        <motion.div
+          key={item._id}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.2, delay: Math.min(i, 8) * 0.04 }}
+          className="flex items-start gap-2.5"
+        >
           <Avatar name={item.user?.name} size="sm" />
           <div className="min-w-0">
             <p className="text-xs text-slate-600">
@@ -43,7 +50,7 @@ export default function ActivityFeed({ projectId, limit = 15 }) {
             </p>
             <p className="text-[11px] text-slate-400">{formatRelativeTime(item.createdAt)}</p>
           </div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );

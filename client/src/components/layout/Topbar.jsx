@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Menu, ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
+import { Menu, ChevronDown, LogOut, User as UserIcon, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Avatar from '../common/Avatar';
 import NotificationBell from './NotificationBell';
+import ThemeToggle from '../common/ThemeToggle';
 
 export default function Topbar({ onMenuClick, title }) {
   const { user, logout } = useAuth();
@@ -29,6 +30,17 @@ export default function Topbar({ onMenuClick, title }) {
       </div>
 
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event('devpilot:open-command-palette'))}
+          className="hidden items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-400 hover:border-slate-300 hover:text-slate-600 sm:flex"
+        >
+          <Search size={13} />
+          Jump to...
+          <kbd className="rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-[10px]">⌘K</kbd>
+        </button>
+
+        <ThemeToggle />
         <NotificationBell />
 
         <div className="relative" ref={ref}>

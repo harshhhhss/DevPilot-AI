@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import { getErrorMessage } from '../../services/api';
 import Button from '../../components/common/Button';
 import Select from '../../components/common/Select';
+import ThemeToggle from '../../components/common/ThemeToggle';
 import { ROLES } from '../../utils/roles';
 
 const REGISTERABLE_ROLES = [ROLES.PROJECT_MANAGER, ROLES.DEVELOPER, ROLES.TESTER, ROLES.STAKEHOLDER];
@@ -38,10 +40,22 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-brand-50 via-slate-50 to-slate-100 px-4 py-10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-brand-300/30 blur-3xl dark:bg-brand-600/20" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-violet-300/30 blur-3xl dark:bg-violet-700/20" />
+
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="relative w-full max-w-sm"
+      >
         <div className="mb-8 flex flex-col items-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-lg font-bold text-white">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-lg font-bold text-white shadow-lg shadow-brand-600/30">
             D
           </div>
           <h1 className="text-xl font-bold text-slate-900">Create your account</h1>
@@ -118,7 +132,7 @@ export default function Register() {
             Sign in
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

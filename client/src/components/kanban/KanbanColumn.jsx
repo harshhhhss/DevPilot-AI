@@ -1,4 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
+import { AnimatePresence, motion } from 'framer-motion';
 import TaskCard from './TaskCard';
 import { TASK_STATUS_LABELS } from '../../utils/constants';
 
@@ -13,13 +14,24 @@ export default function KanbanColumn({ status, tasks, onTaskClick, canDragTask }
       </div>
       <div
         ref={setNodeRef}
-        className={`flex min-h-[120px] flex-1 flex-col gap-2 rounded-b-xl p-2 transition-colors ${
-          isOver ? 'bg-brand-50' : ''
+        className={`flex min-h-[120px] flex-1 flex-col gap-2 rounded-b-xl p-2 transition-all ${
+          isOver ? 'bg-brand-50 ring-2 ring-inset ring-brand-300' : ''
         }`}
       >
-        {tasks.map((task) => (
-          <TaskCard key={task._id} task={task} onClick={onTaskClick} canDrag={canDragTask ? canDragTask(task) : true} />
-        ))}
+        <AnimatePresence initial={false}>
+          {tasks.map((task) => (
+            <motion.div
+              key={task._id}
+              layout
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.16 }}
+            >
+              <TaskCard task={task} onClick={onTaskClick} canDrag={canDragTask ? canDragTask(task) : true} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
         {tasks.length === 0 && (
           <div className="flex-1 rounded-lg border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400">
             Drop tasks here

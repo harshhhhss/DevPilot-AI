@@ -31,7 +31,7 @@ export default function Sidebar({ onNavigate }) {
   return (
     <aside className="flex h-full w-64 flex-none flex-col gap-6 border-r border-slate-200 bg-white px-4 py-5">
       <div className="flex items-center gap-2.5 px-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 font-bold text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 font-bold text-white shadow-md shadow-brand-600/30">
           D
         </div>
         <div className="leading-tight">

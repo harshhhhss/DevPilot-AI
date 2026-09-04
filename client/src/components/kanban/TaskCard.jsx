@@ -12,8 +12,11 @@ export default function TaskCard({ task, onClick, canDrag = true }) {
   });
 
   const style = {
-    transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.5 : 1,
+    transform: transform
+      ? `${CSS.Translate.toString(transform)} ${isDragging ? 'scale(1.04) rotate(-1deg)' : ''}`
+      : undefined,
+    opacity: isDragging ? 0.85 : 1,
+    transition: isDragging ? undefined : 'box-shadow 150ms ease, transform 150ms ease',
   };
 
   const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'DONE';
@@ -26,9 +29,9 @@ export default function TaskCard({ task, onClick, canDrag = true }) {
       {...attributes}
       onClick={() => onClick(task)}
       title={canDrag ? undefined : "You can't move this card — you're not the assignee, manager, or admin"}
-      className={`space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm transition-shadow hover:shadow-md ${
-        canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
-      }`}
+      className={`space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm hover:-translate-y-0.5 hover:shadow-md ${
+        isDragging ? 'shadow-xl ring-2 ring-brand-300' : ''
+      } ${canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium leading-snug text-slate-800">{task.title}</p>

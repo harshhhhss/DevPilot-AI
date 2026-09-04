@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import taskService from '../../services/taskService';
 import sprintService from '../../services/sprintService';
 import { getErrorMessage } from '../../services/api';
+import { celebrate } from '../../utils/confetti';
 import KanbanBoard from '../../components/kanban/KanbanBoard';
 import Button from '../../components/common/Button';
 import Select from '../../components/common/Select';
@@ -110,6 +111,7 @@ export default function ProjectKanban() {
   const handleStatusChange = async (task, newStatus) => {
     const previous = tasks;
     setTasks((prev) => prev.map((t) => (t._id === task._id ? { ...t, status: newStatus } : t)));
+    if (newStatus === 'DONE' && task.status !== 'DONE') celebrate();
     try {
       await taskService.update(task._id, { status: newStatus });
     } catch (err) {

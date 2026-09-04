@@ -11,6 +11,7 @@ import SearchInput from '../../components/common/SearchInput';
 import Select from '../../components/common/Select';
 import EmptyState from '../../components/common/EmptyState';
 import RoleGate from '../../components/common/RoleGate';
+import FadeIn from '../../components/common/FadeIn';
 import { SkeletonCardGrid } from '../../components/common/Skeleton';
 import CreateProjectModal from './CreateProjectModal';
 import { PROJECT_STATUSES } from '../../utils/constants';
@@ -74,7 +75,7 @@ export default function ProjectsList() {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <FadeIn className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
             <Link key={project._id} to={`/projects/${project._id}`}>
               <Card className="flex h-full flex-col gap-3 p-5 transition-shadow hover:shadow-lg">
@@ -96,7 +97,7 @@ export default function ProjectsList() {
               </Card>
             </Link>
           ))}
-        </div>
+        </FadeIn>
       )}
 
       <CreateProjectModal

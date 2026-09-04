@@ -9,6 +9,7 @@ import Badge from '../../components/common/Badge';
 import Select from '../../components/common/Select';
 import SearchInput from '../../components/common/SearchInput';
 import EmptyState from '../../components/common/EmptyState';
+import FadeIn from '../../components/common/FadeIn';
 import { SkeletonRows } from '../../components/common/Skeleton';
 import { BUG_STATUSES, BUG_SEVERITIES } from '../../utils/constants';
 import { formatDate } from '../../utils/format';
@@ -46,7 +47,7 @@ export default function BugsList() {
       ) : bugs.length === 0 ? (
         <EmptyState icon={BugIcon} title="No bugs found" description="Bugs you reported or are assigned to will appear here." />
       ) : (
-        <div className="space-y-2">
+        <FadeIn className="space-y-2">
           {bugs.map((bug) => (
             <Card key={bug._id} className="cursor-pointer p-4 hover:shadow-md" onClick={() => navigate(`/bugs/${bug._id}`)}>
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -61,7 +62,7 @@ export default function BugsList() {
               </div>
             </Card>
           ))}
-        </div>
+        </FadeIn>
       )}
     </div>
   );

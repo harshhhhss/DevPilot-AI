@@ -9,6 +9,7 @@ import aiService from '../../services/aiService';
 import sprintService from '../../services/sprintService';
 import taskService from '../../services/taskService';
 import { getErrorMessage } from '../../services/api';
+import { aiToast } from '../../utils/aiToast';
 import { PRIORITIES } from '../../utils/constants';
 
 const emptyDraft = () => ({
@@ -50,6 +51,7 @@ export default function AISprintPlannerModal({ open, onClose, project, onCreated
         stories: data.stories.map((s) => ({ ...s, acceptanceCriteria: s.acceptanceCriteria || [], tasks: s.tasks || [] })),
       });
       setStep('review');
+      aiToast(`Drafted ${data.stories.length} stories — review before saving`);
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
@@ -100,7 +102,7 @@ export default function AISprintPlannerModal({ open, onClose, project, onCreated
         )
       );
 
-      toast.success(`Sprint "${sprint.name}" created with ${draft.stories.length} stories`);
+      aiToast(`Sprint "${sprint.name}" created with ${draft.stories.length} AI-drafted stories`);
       onCreated();
       handleClose();
     } catch (err) {

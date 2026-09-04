@@ -10,6 +10,7 @@ import Button from '../common/Button';
 import Select from '../common/Select';
 import AIBadge from '../common/AIBadge';
 import RoleGate from '../common/RoleGate';
+import { aiToast } from '../../utils/aiToast';
 import { BUG_SEVERITIES, BUG_STATUSES } from '../../utils/constants';
 import { MANAGING_ROLES, ROLES } from '../../utils/roles';
 import { useAuth } from '../../hooks/useAuth';
@@ -59,6 +60,7 @@ export default function BugDetailPanel({ bug, onUpdate, assignableUsers = [] }) 
     try {
       const { data } = await aiService.analyzeBug({ bugId: bug._id });
       onUpdate({ ...bug, aiAnalysis: { ...data, generatedAt: new Date().toISOString() } });
+      aiToast('Bug analysis ready');
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {

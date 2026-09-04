@@ -10,6 +10,7 @@ import Avatar from '../../components/common/Avatar';
 import Select from '../../components/common/Select';
 import SearchInput from '../../components/common/SearchInput';
 import EmptyState from '../../components/common/EmptyState';
+import FadeIn from '../../components/common/FadeIn';
 import { SkeletonRows } from '../../components/common/Skeleton';
 import { TASK_STATUSES, PRIORITIES } from '../../utils/constants';
 import { formatDate } from '../../utils/format';
@@ -47,6 +48,7 @@ export default function TasksList() {
       ) : tasks.length === 0 ? (
         <EmptyState icon={ListChecks} title="No tasks found" description="Tasks assigned to you across projects will appear here." />
       ) : (
+        <FadeIn>
         <Card className="overflow-hidden">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
@@ -84,6 +86,7 @@ export default function TasksList() {
             </tbody>
           </table>
         </Card>
+        </FadeIn>
       )}
     </div>
   );
