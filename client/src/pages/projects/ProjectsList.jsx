@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Plus, FolderKanban } from 'lucide-react';
 import projectService from '../../services/projectService';
@@ -19,6 +19,7 @@ import { MANAGING_ROLES } from '../../utils/roles';
 import { formatDate } from '../../utils/format';
 
 export default function ProjectsList() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -42,6 +43,21 @@ export default function ProjectsList() {
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, status]);
+
+  // Lets the command palette's "Create new project" action open this page's
+  // existing create flow — it navigates here with ?new=1, which we consume
+  // once and strip so a refresh doesn't reopen the modal.
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setShowCreate(true);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('new');
+        return next;
+      }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="space-y-5">

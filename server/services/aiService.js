@@ -197,6 +197,56 @@ Summarize as specified.`;
   return callGemini(MEETING_SUMMARY_INSTRUCTION, userPrompt);
 };
 
+const TASK_PARSE_INSTRUCTION = `You are an assistant that converts a single natural-language request into a structured task draft for DevPilot AI's Kanban board.
+Respond ONLY with JSON matching exactly this shape:
+{
+  "title": string,
+  "description": string,
+  "dueDate": string | null,          // ISO date "YYYY-MM-DD", resolved from any relative date mentioned (e.g. "next Friday"), or null if none was mentioned
+  "priority": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+  "suggestedAssigneeName": string | null   // the person/team/module name mentioned as the assignee, verbatim, or null if none was mentioned
+}
+Default to "MEDIUM" priority when none is stated. Keep the title short and the description one or two sentences expanding on it. Do not include any text outside the JSON object.`;
+
+const parseTaskFromText = async ({ text, referenceDate, projectName, memberNames }) => {
+  const userPrompt = `Today's date: ${referenceDate}
+Project: ${projectName || 'N/A'}
+Known team members on this project: ${memberNames?.length ? memberNames.join(', ') : 'N/A'}
+Request: """${text}"""
+
+Parse this into the structured task draft as specified.`;
+
+  return callGemini(TASK_PARSE_INSTRUCTION, userPrompt);
+};
+
+const SPRINT_RETRO_INSTRUCTION = `You are an Agile coach helping a Project Manager run a sprint retrospective inside DevPilot AI.
+Given a summary of what happened during the sprint, produce a balanced, constructive retrospective.
+Respond ONLY with JSON matching exactly this shape:
+{
+  "wentWell": string[],
+  "didntGoWell": string[],
+  "improvements": string[]        // 2-3 concrete, actionable suggestions for the next sprint
+}
+Be specific and reference the given data where relevant, but do not invent facts not supported by it. Do not include any text outside the JSON object.`;
+
+const generateSprintRetro = async ({ sprintName, sprintGoal, completedTasks, carriedOverTasks, bugsReported }) => {
+  const userPrompt = `Sprint: ${sprintName}
+Sprint goal: ${sprintGoal || 'N/A'}
+
+Completed tasks (${completedTasks.length}):
+${completedTasks.map((t) => `- ${t.title} [${t.priority}]`).join('\n') || 'None'}
+
+Carried-over / incomplete tasks (${carriedOverTasks.length}):
+${carriedOverTasks.map((t) => `- ${t.title} [${t.priority}, ${t.status}]`).join('\n') || 'None'}
+
+Bugs reported during the sprint window (${bugsReported.length}):
+${bugsReported.map((b) => `- ${b.title} [${b.severity}, ${b.status}]`).join('\n') || 'None'}
+
+Generate the sprint retrospective as specified.`;
+
+  return callGemini(SPRINT_RETRO_INSTRUCTION, userPrompt);
+};
+
 module.exports = {
   generateSprintPlan,
   generateUserStory,
@@ -204,4 +254,6 @@ module.exports = {
   analyzeBug,
   analyzeRisk,
   summarizeMeeting,
+  parseTaskFromText,
+  generateSprintRetro,
 };

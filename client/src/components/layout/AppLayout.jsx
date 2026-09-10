@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import CommandPalette from '../common/CommandPalette';
+import QuickAddTaskModal from '../tasks/QuickAddTaskModal';
 
 const TITLES = [
   { match: /^\/dashboard/, title: 'Dashboard' },
@@ -57,6 +58,7 @@ export default function AppLayout() {
       </div>
 
       <CommandPalette />
+      <QuickAddTaskModal />
     </div>
   );
 }

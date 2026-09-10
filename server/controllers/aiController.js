@@ -219,6 +219,90 @@ const summarizeMeeting = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft — review and edit before saving.' });
 });
 
+// POST /api/v1/ai/parse-task — Manager/Admin only (task creation is a
+// managing-role action, same as manual task creation via createTask).
+const parseTaskFromText = asyncHandler(async (req, res) => {
+  const { projectId, text } = req.body;
+  if (!text?.trim()) throw new ApiError(400, 'text is required');
+
+  const project = await Project.findById(projectId).populate('members', 'name').populate('manager', 'name');
+  if (!project) throw new ApiError(404, 'Project not found');
+  if (!canManageProject(project, req.user)) throw new ApiError(403, 'Forbidden: only the project manager or an admin can create tasks');
+
+  const members = [project.manager, ...(project.members || [])].filter(Boolean);
+
+  const output = await runAI({
+    user: req.user,
+    project,
+    type: 'TASK_PARSE',
+    input: { text },
+    fn: () =>
+      aiService.parseTaskFromText({
+        text,
+        referenceDate: new Date().toISOString().slice(0, 10),
+        projectName: project.name,
+        memberNames: members.map((m) => m.name),
+      }),
+  });
+
+  // Best-effort match of the AI's free-text assignee mention against real
+  // project members, mirroring meetingController's action-item resolution —
+  // the frontend still shows this as an editable suggestion, never a fact.
+  let suggestedAssigneeId = null;
+  if (output.suggestedAssigneeName) {
+    const needle = output.suggestedAssigneeName.trim().toLowerCase();
+    const match = members.find((m) => {
+      const name = m.name.toLowerCase();
+      return name.includes(needle) || needle.includes(name.split(' ')[0]);
+    });
+    if (match) suggestedAssigneeId = match._id;
+  }
+
+  res.status(200).json({
+    success: true,
+    data: { ...output, suggestedAssigneeId },
+    disclaimer: 'AI-generated draft — review and edit before saving.',
+  });
+});
+
+// POST /api/v1/ai/sprint-retro/:sprintId — Manager/Admin only.
+const generateSprintRetro = asyncHandler(async (req, res) => {
+  const sprint = await Sprint.findById(req.params.sprintId);
+  if (!sprint) throw new ApiError(404, 'Sprint not found');
+
+  const project = await Project.findById(sprint.project);
+  if (!project) throw new ApiError(404, 'Project not found');
+  if (!canManageProject(project, req.user)) throw new ApiError(403, 'Forbidden: only the project manager or an admin can generate a sprint retrospective');
+
+  const [sprintTasks, windowBugs] = await Promise.all([
+    Task.find({ sprint: sprint._id }).select('title status priority'),
+    Bug.find({
+      project: project._id,
+      createdAt: { $gte: sprint.startDate, $lte: sprint.endDate },
+    }).select('title severity status'),
+  ]);
+
+  const completedTasks = sprintTasks.filter((t) => t.status === 'DONE');
+  const carriedOverTasks = sprintTasks.filter((t) => t.status !== 'DONE');
+
+  const output = await runAI({
+    user: req.user,
+    project,
+    type: 'SPRINT_RETRO',
+    input: { sprintId: sprint._id },
+    fn: () =>
+      aiService.generateSprintRetro({
+        sprintName: sprint.name,
+        sprintGoal: sprint.goal,
+        completedTasks,
+        carriedOverTasks,
+        bugsReported: windowBugs,
+      }),
+  });
+
+  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft — review and edit before saving.' });
+});
+
 module.exports = {
   generateSprintPlan,
   generateUserStory,
@@ -226,4 +310,6 @@ module.exports = {
   analyzeBug,
   analyzeRisk,
   summarizeMeeting,
+  parseTaskFromText,
+  generateSprintRetro,
 };

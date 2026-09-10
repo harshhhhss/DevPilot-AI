@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Sparkles, ListChecks } from 'lucide-react';
+import { Plus, Sparkles, ListChecks, NotebookPen } from 'lucide-react';
 import sprintService from '../../services/sprintService';
 import { getErrorMessage } from '../../services/api';
 import Card from '../../components/common/Card';
@@ -13,6 +13,7 @@ import RoleGate from '../../components/common/RoleGate';
 import Modal from '../../components/common/Modal';
 import { SkeletonRows } from '../../components/common/Skeleton';
 import AISprintPlannerModal from './AISprintPlannerModal';
+import SprintRetroModal from './SprintRetroModal';
 import { MANAGING_ROLES } from '../../utils/roles';
 import { SPRINT_STATUSES } from '../../utils/constants';
 import { formatDate } from '../../utils/format';
@@ -104,6 +105,7 @@ export default function ProjectSprints() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [showAIPlanner, setShowAIPlanner] = useState(false);
+  const [retroSprint, setRetroSprint] = useState(null);
 
   const load = async () => {
     try {
@@ -168,13 +170,21 @@ export default function ProjectSprints() {
                     {formatDate(sprint.startDate)} — {formatDate(sprint.endDate)}
                   </p>
                 </div>
-                <RoleGate roles={MANAGING_ROLES}>
-                  <Select
-                    value={sprint.status}
-                    onChange={(status) => handleStatusChange(sprint, status)}
-                    options={SPRINT_STATUSES}
-                  />
-                </RoleGate>
+                <div className="flex flex-none items-center gap-2">
+                  <RoleGate roles={MANAGING_ROLES}>
+                    {sprint.status === 'COMPLETED' && (
+                      <Button variant="secondary" size="sm" onClick={() => setRetroSprint(sprint)}>
+                        <NotebookPen size={13} />
+                        {sprint.retrospective?.savedAt ? 'View Retrospective' : 'Retrospective'}
+                      </Button>
+                    )}
+                    <Select
+                      value={sprint.status}
+                      onChange={(status) => handleStatusChange(sprint, status)}
+                      options={SPRINT_STATUSES}
+                    />
+                  </RoleGate>
+                </div>
               </div>
             </Card>
           ))}
@@ -196,6 +206,14 @@ export default function ProjectSprints() {
         onClose={() => setShowAIPlanner(false)}
         project={project}
         onCreated={load}
+      />
+
+      <SprintRetroModal
+        open={Boolean(retroSprint)}
+        onClose={() => setRetroSprint(null)}
+        project={project}
+        sprint={retroSprint}
+        onSaved={(updated) => setSprints((prev) => prev.map((s) => (s._id === updated._id ? updated : s)))}
       />
     </div>
   );

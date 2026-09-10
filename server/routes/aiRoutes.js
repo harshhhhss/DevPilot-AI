@@ -6,6 +6,8 @@ const {
   analyzeBug,
   analyzeRisk,
   summarizeMeeting,
+  parseTaskFromText,
+  generateSprintRetro,
 } = require('../controllers/aiController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -19,5 +21,7 @@ router.post('/prioritize-task', prioritizeTask);
 router.post('/analyze-bug', analyzeBug);
 router.post('/analyze-risk', analyzeRisk);
 router.post('/summarize-meeting', summarizeMeeting);
+router.post('/parse-task', parseTaskFromText);
+router.post('/sprint-retro/:sprintId', generateSprintRetro);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import taskService from '../../services/taskService';
 import sprintService from '../../services/sprintService';
 import { getErrorMessage } from '../../services/api';
@@ -13,7 +13,7 @@ import Modal from '../../components/common/Modal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import RoleGate from '../../components/common/RoleGate';
 import TaskDetailPanel from '../../components/tasks/TaskDetailPanel';
-import { SkeletonRows } from '../../components/common/Skeleton';
+import { SkeletonKanban } from '../../components/common/Skeleton';
 import { MANAGING_ROLES } from '../../utils/roles';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -108,6 +108,21 @@ export default function ProjectKanban() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project._id]);
 
+  // The Quick Add modal is mounted globally (so it also works from the
+  // command palette) and creates the task via the normal REST call — this
+  // just reflects that into the board's local state, the same way NewTaskModal's
+  // onCreated callback does for the in-page create form.
+  useEffect(() => {
+    const handleTaskCreated = (e) => {
+      const task = e.detail;
+      if (String(task.project) === String(project._id) || String(task.project?._id) === String(project._id)) {
+        setTasks((prev) => [task, ...prev]);
+      }
+    };
+    window.addEventListener('devpilot:task-created', handleTaskCreated);
+    return () => window.removeEventListener('devpilot:task-created', handleTaskCreated);
+  }, [project._id]);
+
   const handleStatusChange = async (task, newStatus) => {
     const previous = tasks;
     setTasks((prev) => prev.map((t) => (t._id === task._id ? { ...t, status: newStatus } : t)));
@@ -149,7 +164,7 @@ export default function ProjectKanban() {
     return isAdmin || isThisProjectManager || Boolean(isAssignee);
   };
 
-  if (loading) return <SkeletonRows count={4} />;
+  if (loading) return <SkeletonKanban />;
 
   return (
     <div className="space-y-4">
@@ -161,10 +176,19 @@ export default function ProjectKanban() {
           placeholder="All sprints"
         />
         <RoleGate roles={MANAGING_ROLES}>
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus size={15} />
-            New Task
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => window.dispatchEvent(new CustomEvent('devpilot:quick-add-task', { detail: { projectId: project._id } }))}
+            >
+              <Sparkles size={15} />
+              Quick Add
+            </Button>
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus size={15} />
+              New Task
+            </Button>
+          </div>
         </RoleGate>
       </div>
 

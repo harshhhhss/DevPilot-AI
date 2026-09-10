@@ -5,7 +5,7 @@ import analyticsService from '../../services/analyticsService';
 import Card from '../../components/common/Card';
 import StatCard from '../../components/common/StatCard';
 import Avatar from '../../components/common/Avatar';
-import { Skeleton } from '../../components/common/Skeleton';
+import { Skeleton, SkeletonStatGrid, SkeletonChart, SkeletonRows } from '../../components/common/Skeleton';
 import { ListChecks, Bug, AlertTriangle, TrendingUp } from 'lucide-react';
 
 const STATUS_COLORS = ['#94a3b8', '#3766f7', '#8b5cf6', '#10b981'];
@@ -21,9 +21,16 @@ export default function ProjectAnalytics() {
 
   if (!data) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-5">
+        <SkeletonStatGrid />
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <SkeletonChart variant="pie" />
+          <SkeletonChart variant="bar" />
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+          <Skeleton className="mb-4 h-4 w-28" />
+          <SkeletonRows count={3} />
+        </div>
       </div>
     );
   }

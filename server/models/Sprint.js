@@ -34,6 +34,16 @@ const sprintSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    // The human-approved retrospective. AI drafts one (wentWell/didntGoWell/
+    // improvements) but nothing here is written until the Manager reviews the
+    // draft and explicitly saves it (CON-08) — see sprintController.saveRetrospective.
+    retrospective: {
+      wentWell: { type: [String], default: [] },
+      didntGoWell: { type: [String], default: [] },
+      improvements: { type: [String], default: [] },
+      savedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+      savedAt: { type: Date, default: null },
+    },
   },
   { timestamps: true }
 );

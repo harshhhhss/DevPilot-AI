@@ -21,6 +21,8 @@ const aiRequestSchema = new mongoose.Schema(
         'BUG_ANALYSIS',
         'RISK_ANALYSIS',
         'MEETING_SUMMARY',
+        'TASK_PARSE',
+        'SPRINT_RETRO',
       ],
       required: true,
     },

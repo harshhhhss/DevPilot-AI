@@ -6,7 +6,7 @@ import projectService from '../services/projectService';
 import StatCard from '../components/common/StatCard';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
-import { Skeleton } from '../components/common/Skeleton';
+import { SkeletonStatGrid, SkeletonChart } from '../components/common/Skeleton';
 import { FolderKanban, ListChecks, Bug, AlertTriangle } from 'lucide-react';
 import { formatDate } from '../utils/format';
 
@@ -23,9 +23,16 @@ export default function Analytics() {
 
   if (!overview) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-5">
+        <SkeletonStatGrid />
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="lg:col-span-1">
+            <SkeletonChart variant="pie" />
+          </div>
+          <div className="lg:col-span-2">
+            <SkeletonChart variant="bar" />
+          </div>
+        </div>
       </div>
     );
   }
