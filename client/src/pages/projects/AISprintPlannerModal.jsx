@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { Sparkles, Trash2, Loader2 } from 'lucide-react';
+import { Sparkles, Trash2 } from 'lucide-react';
 import Modal from '../../components/common/Modal';
 import Button from '../../components/common/Button';
 import Select from '../../components/common/Select';
 import AIBadge from '../../components/common/AIBadge';
+import { AIThinking, AIErrorBanner } from '../../components/common/AIStatus';
 import aiService from '../../services/aiService';
 import sprintService from '../../services/sprintService';
 import taskService from '../../services/taskService';
@@ -26,12 +27,14 @@ export default function AISprintPlannerModal({ open, onClose, project, onCreated
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState(emptyDraft());
+  const [genError, setGenError] = useState('');
 
   const reset = () => {
     setStep('input');
     setGoal('');
     setTeamSize('');
     setDraft(emptyDraft());
+    setGenError('');
   };
 
   const handleClose = () => {
@@ -42,6 +45,7 @@ export default function AISprintPlannerModal({ open, onClose, project, onCreated
   const handleGenerate = async () => {
     if (!goal.trim()) return;
     setGenerating(true);
+    setGenError('');
     try {
       const { data } = await aiService.generateSprintPlan({ projectId: project._id, sprintGoal: goal, teamSize });
       setDraft({
@@ -51,9 +55,9 @@ export default function AISprintPlannerModal({ open, onClose, project, onCreated
         stories: data.stories.map((s) => ({ ...s, acceptanceCriteria: s.acceptanceCriteria || [], tasks: s.tasks || [] })),
       });
       setStep('review');
-      aiToast(`Drafted ${data.stories.length} stories — review before saving`);
+      aiToast(`Drafted ${data.stories.length} stories. Review before saving.`);
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      setGenError(getErrorMessage(err));
     } finally {
       setGenerating(false);
     }
@@ -167,12 +171,15 @@ export default function AISprintPlannerModal({ open, onClose, project, onCreated
             <Sparkles size={15} />
             Generate Sprint Plan
           </Button>
+
+          {generating && <AIThinking label="Drafting a structured backlog with Gemini..." />}
+          {genError && !generating && <AIErrorBanner message={genError} onRetry={handleGenerate} />}
         </div>
       )}
 
       {step === 'review' && (
         <div className="space-y-5">
-          <AIBadge label="AI-generated draft — review and edit before saving" />
+          <AIBadge label="AI-generated draft. Review and edit before saving." tone="draft" />
 
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-1">
@@ -259,13 +266,6 @@ export default function AISprintPlannerModal({ open, onClose, project, onCreated
             ))}
             {draft.stories.length === 0 && <p className="text-sm text-slate-400">All stories removed. Go back to regenerate.</p>}
           </div>
-        </div>
-      )}
-
-      {generating && step === 'input' && (
-        <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-          <Loader2 size={14} className="animate-spin" />
-          Generating structured backlog with Gemini...
         </div>
       )}
     </Modal>

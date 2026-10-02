@@ -187,7 +187,7 @@ export default function TaskDetailPanel({ task, onUpdate, onDelete, assignableUs
             <div className="mt-2 flex items-start gap-2">
               <AIBadge />
               <p className="text-xs text-slate-600">
-                Suggests <strong>{task.aiSuggestedPriority}</strong> — {task.aiPriorityReason}
+                Suggests <strong>{task.aiSuggestedPriority}</strong>: {task.aiPriorityReason}
               </p>
             </div>
           )}

@@ -75,7 +75,7 @@ export default function ChatPanel({ projectId }) {
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
           <p className="text-center text-sm text-slate-400">
-            No messages yet. Say hello to the team — messages are live for everyone currently viewing this project.
+            No messages yet. Say hello to the team. Messages are live for everyone currently viewing this project.
           </p>
         )}
         {messages.map((m, i) => (

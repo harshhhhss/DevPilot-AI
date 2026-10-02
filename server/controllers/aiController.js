@@ -64,7 +64,7 @@ const generateSprintPlan = asyncHandler(async (req, res) => {
       }),
   });
 
-  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft — review and edit before saving.' });
+  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft. Review and edit before saving.' });
 });
 
 // POST /api/v1/ai/user-story — Manager/Admin only.
@@ -87,7 +87,7 @@ const generateUserStory = asyncHandler(async (req, res) => {
     fn: () => aiService.generateUserStory({ featureDescription, projectName: project?.name }),
   });
 
-  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft — review and edit before saving.' });
+  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft. Review and edit before saving.' });
 });
 
 // POST /api/v1/ai/prioritize-task — Manager/Admin only.
@@ -122,7 +122,7 @@ const prioritizeTask = asyncHandler(async (req, res) => {
   task.aiPriorityReason = output.reason;
   await task.save();
 
-  res.status(200).json({ success: true, data: output, disclaimer: 'AI recommendation — apply it only if you agree.' });
+  res.status(200).json({ success: true, data: output, disclaimer: 'AI recommendation. Apply it only if you agree.' });
 });
 
 // POST /api/v1/ai/analyze-bug — any project member (part of triage/resolution work).
@@ -153,7 +153,7 @@ const analyzeBug = asyncHandler(async (req, res) => {
   bug.aiAnalysis = { ...output, generatedAt: new Date() };
   await bug.save();
 
-  res.status(200).json({ success: true, data: output, disclaimer: 'AI Recommendation — not a guaranteed diagnosis.' });
+  res.status(200).json({ success: true, data: output, disclaimer: 'AI Recommendation, not a guaranteed diagnosis.' });
 });
 
 // POST /api/v1/ai/analyze-risk — Manager/Admin only.
@@ -216,7 +216,7 @@ const summarizeMeeting = asyncHandler(async (req, res) => {
     fn: () => aiService.summarizeMeeting({ notes, projectName: project?.name }),
   });
 
-  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft — review and edit before saving.' });
+  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft. Review and edit before saving.' });
 });
 
 // POST /api/v1/ai/parse-task — Manager/Admin only (task creation is a
@@ -261,7 +261,7 @@ const parseTaskFromText = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: { ...output, suggestedAssigneeId },
-    disclaimer: 'AI-generated draft — review and edit before saving.',
+    disclaimer: 'AI-generated draft. Review and edit before saving.',
   });
 });
 
@@ -300,7 +300,7 @@ const generateSprintRetro = asyncHandler(async (req, res) => {
       }),
   });
 
-  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft — review and edit before saving.' });
+  res.status(200).json({ success: true, data: output, disclaimer: 'AI-generated draft. Review and edit before saving.' });
 });
 
 module.exports = {

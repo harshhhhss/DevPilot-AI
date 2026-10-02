@@ -60,7 +60,7 @@ export default function ProjectDetailLayout() {
         </div>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">{project.description}</p>
         <p className="mt-1 text-xs text-slate-400">
-          {formatDate(project.startDate)} — {formatDate(project.endDate)} · Managed by {project.manager?.name}
+          {formatDate(project.startDate)} to {formatDate(project.endDate)} · Managed by {project.manager?.name}
         </p>
       </div>
 

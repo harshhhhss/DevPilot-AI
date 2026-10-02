@@ -54,7 +54,7 @@ export default function Settings() {
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-500">Organization</span>
-          <span className="font-medium text-slate-800">{user.organization?.name || '—'}</span>
+          <span className="font-medium text-slate-800">{user.organization?.name || 'Not set'}</span>
         </div>
       </Card>
 

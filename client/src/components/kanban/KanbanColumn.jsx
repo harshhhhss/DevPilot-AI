@@ -9,7 +9,9 @@ export default function KanbanColumn({ status, tasks, onTaskClick, canDragTask }
   return (
     <div className="flex w-72 flex-none flex-col rounded-xl bg-slate-100/70">
       <div className="flex items-center justify-between px-3 py-2.5">
-        <h3 className="text-sm font-semibold text-slate-700">{TASK_STATUS_LABELS[status]}</h3>
+        <h3 className="font-['JetBrains_Mono'] text-xs font-semibold uppercase tracking-wide text-slate-700">
+          {TASK_STATUS_LABELS[status]}
+        </h3>
         <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500">{tasks.length}</span>
       </div>
       <div

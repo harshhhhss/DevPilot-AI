@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Sparkles, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Modal from '../../components/common/Modal';
 import Button from '../../components/common/Button';
 import AIBadge from '../../components/common/AIBadge';
+import EditableList from '../../components/common/EditableList';
+import { AIThinking, AIErrorBanner } from '../../components/common/AIStatus';
 import aiService from '../../services/aiService';
 import sprintService from '../../services/sprintService';
 import { getErrorMessage } from '../../services/api';
@@ -16,42 +18,11 @@ const SECTIONS = [
   { key: 'improvements', label: 'Suggested improvements', tone: 'border-brand-200 bg-brand-50/40' },
 ];
 
-function EditableList({ items, onChange }) {
-  const update = (i, value) => onChange(items.map((v, idx) => (idx === i ? value : v)));
-  const remove = (i) => onChange(items.filter((_, idx) => idx !== i));
-  const add = () => onChange([...items, '']);
-
-  return (
-    <div className="space-y-2">
-      {items.map((item, i) => (
-        <div key={i} className="flex items-start gap-2">
-          <textarea
-            rows={1}
-            value={item}
-            onChange={(e) => update(i, e.target.value)}
-            className="w-full flex-1 resize-none rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm focus:border-brand-500 focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={() => remove(i)}
-            className="mt-1 flex-none rounded-md p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-          >
-            <Trash2 size={13} />
-          </button>
-        </div>
-      ))}
-      <button type="button" onClick={add} className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline">
-        <Plus size={12} /> Add point
-      </button>
-      {items.length === 0 && <p className="text-xs text-slate-400">Nothing here yet.</p>}
-    </div>
-  );
-}
-
 export default function SprintRetroModal({ open, onClose, project, sprint, onSaved }) {
   const [draft, setDraft] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [genError, setGenError] = useState('');
 
   useEffect(() => {
     if (!open) return;
@@ -61,12 +32,13 @@ export default function SprintRetroModal({ open, onClose, project, sprint, onSav
 
   const handleGenerate = async () => {
     setGenerating(true);
+    setGenError('');
     try {
       const { data } = await aiService.generateSprintRetro(sprint._id);
       setDraft(data);
-      aiToast('Retrospective drafted — review before saving');
+      aiToast('Retrospective drafted. Review before saving.');
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      setGenError(getErrorMessage(err));
     } finally {
       setGenerating(false);
     }
@@ -96,7 +68,7 @@ export default function SprintRetroModal({ open, onClose, project, sprint, onSav
       title={
         <span className="flex items-center gap-2">
           <Sparkles size={16} className="text-violet-600" />
-          Sprint Retrospective — {sprint?.name}
+          Sprint Retrospective: {sprint?.name}
         </span>
       }
       footer={
@@ -123,20 +95,17 @@ export default function SprintRetroModal({ open, onClose, project, sprint, onSav
             <Sparkles size={15} />
             Generate Retrospective
           </Button>
+          {genError && <AIErrorBanner message={genError} onRetry={handleGenerate} />}
         </div>
       )}
 
-      {generating && (
-        <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-500">
-          <Loader2 size={16} className="animate-spin" />
-          Analyzing sprint data with Gemini...
-        </div>
-      )}
+      {generating && <AIThinking label="Analyzing sprint data with Gemini..." />}
 
       {draft && !generating && (
         <div className="space-y-4">
+          {genError && <AIErrorBanner message={genError} onRetry={handleGenerate} />}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <AIBadge label="AI-generated draft — review and edit before saving" />
+            <AIBadge label="AI-generated draft. Review and edit before saving." tone="draft" />
             {alreadySaved && sprint.retrospective.savedAt && (
               <p className="text-xs text-slate-400">Last saved {formatDateTime(sprint.retrospective.savedAt)}</p>
             )}

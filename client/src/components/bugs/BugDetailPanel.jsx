@@ -141,7 +141,7 @@ export default function BugDetailPanel({ bug, onUpdate, assignableUsers = [] }) 
         </div>
         {bug.aiAnalysis?.generatedAt && (
           <div className="mt-2 space-y-1.5">
-            <AIBadge label="AI Recommendation — not a guaranteed diagnosis" />
+            <AIBadge label="AI Recommendation, not a guaranteed diagnosis" />
             <p className="text-xs text-slate-600">
               <strong>Possible cause:</strong> {bug.aiAnalysis.possibleCause}
             </p>

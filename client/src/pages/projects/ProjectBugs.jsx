@@ -48,7 +48,7 @@ export default function ProjectBugs() {
       </div>
 
       {bugs.length === 0 ? (
-        <EmptyState icon={BugIcon} title="No bugs reported" description="Great news — or nobody has reported one yet." />
+        <EmptyState icon={BugIcon} title="No bugs reported" description="Either this project is running clean, or nobody has logged one yet. Report the first if you've found something." />
       ) : (
         <div className="space-y-2">
           {bugs.map((bug) => (

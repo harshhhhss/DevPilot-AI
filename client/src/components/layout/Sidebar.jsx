@@ -35,7 +35,7 @@ export default function Sidebar({ onNavigate }) {
           D
         </div>
         <div className="leading-tight">
-          <p className="text-sm font-bold text-slate-900">DevPilot AI</p>
+          <p className="font-['Manrope'] text-sm font-bold text-slate-900">DevPilot AI</p>
           <p className="text-xs text-slate-500">Project OS</p>
         </div>
       </div>

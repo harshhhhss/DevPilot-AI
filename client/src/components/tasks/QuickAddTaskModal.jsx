@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Select from '../common/Select';
 import AIBadge from '../common/AIBadge';
+import { AIThinking, AIErrorBanner } from '../common/AIStatus';
 import projectService from '../../services/projectService';
 import taskService from '../../services/taskService';
 import aiService from '../../services/aiService';
@@ -26,6 +27,7 @@ export default function QuickAddTaskModal() {
   const [draft, setDraft] = useState(null);
   const [parsing, setParsing] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [parseError, setParseError] = useState('');
 
   useEffect(() => {
     const handleOpen = (e) => {
@@ -47,6 +49,7 @@ export default function QuickAddTaskModal() {
     setText('');
     setDraft(null);
     setProjectMembers([]);
+    setParseError('');
   };
 
   const handleClose = () => {
@@ -57,6 +60,7 @@ export default function QuickAddTaskModal() {
   const handleParse = async () => {
     if (!projectId || !text.trim()) return;
     setParsing(true);
+    setParseError('');
     try {
       const [{ data }, project] = await Promise.all([
         aiService.parseTask({ projectId, text }),
@@ -70,9 +74,9 @@ export default function QuickAddTaskModal() {
         priority: data.priority || 'MEDIUM',
         assignee: data.suggestedAssigneeId || '',
       });
-      aiToast('Task drafted — review before creating');
+      aiToast('Task drafted. Review before creating.');
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      setParseError(getErrorMessage(err));
     } finally {
       setParsing(false);
     }
@@ -156,18 +160,14 @@ export default function QuickAddTaskModal() {
             Parse with AI
           </Button>
 
-          {parsing && (
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 size={14} className="animate-spin" />
-              Parsing with Gemini...
-            </div>
-          )}
+          {parsing && <AIThinking label="Parsing your request with Gemini..." />}
+          {parseError && !parsing && <AIErrorBanner message={parseError} onRetry={handleParse} />}
         </div>
       )}
 
       {draft && (
         <div className="space-y-4">
-          <AIBadge label="AI-generated draft — review and edit before creating" />
+          <AIBadge label="AI-generated draft. Review and edit before creating." tone="draft" />
 
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-700">Title</label>

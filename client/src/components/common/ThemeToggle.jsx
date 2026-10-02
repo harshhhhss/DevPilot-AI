@@ -20,7 +20,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={cycle}
-      title={`${LABELS[mode]} — click to change`}
+      title={`${LABELS[mode]}, click to change`}
       className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
     >
       <Icon size={17} />

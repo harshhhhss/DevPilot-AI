@@ -43,7 +43,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-slate-900">Welcome back, {user?.name?.split(' ')[0]}</h2>
+        <h2 className="font-['Manrope'] text-lg font-bold text-slate-900">Welcome back, {user?.name?.split(' ')[0]}</h2>
         <p className="text-sm text-slate-500">Here&apos;s what&apos;s happening across your projects.</p>
       </div>
 

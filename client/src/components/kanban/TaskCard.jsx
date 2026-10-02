@@ -28,14 +28,22 @@ export default function TaskCard({ task, onClick, canDrag = true }) {
       {...listeners}
       {...attributes}
       onClick={() => onClick(task)}
-      title={canDrag ? undefined : "You can't move this card — you're not the assignee, manager, or admin"}
+      title={canDrag ? undefined : "You can't move this card: you're not the assignee, manager, or admin"}
       className={`space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm hover:-translate-y-0.5 hover:shadow-md ${
         isDragging ? 'shadow-xl ring-2 ring-brand-300' : ''
       } ${canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium leading-snug text-slate-800">{task.title}</p>
-        {task.aiGenerated && <Sparkles size={13} className="mt-0.5 flex-none text-violet-500" />}
+        {task.aiGenerated && (
+          <span
+            title="Created from an AI-generated draft"
+            className="flex flex-none items-center gap-1 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 font-['JetBrains_Mono'] text-[9px] font-medium uppercase tracking-wide text-amber-700"
+          >
+            <Sparkles size={9} />
+            AI
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">

@@ -1,10 +1,10 @@
 export const formatDate = (value) => {
-  if (!value) return '—';
+  if (!value) return 'Not set';
   return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
 export const formatDateTime = (value) => {
-  if (!value) return '—';
+  if (!value) return 'Not set';
   return new Date(value).toLocaleString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -15,7 +15,7 @@ export const formatDateTime = (value) => {
 };
 
 export const formatRelativeTime = (value) => {
-  if (!value) return '—';
+  if (!value) return 'Not set';
   const diffMs = Date.now() - new Date(value).getTime();
   const diffSec = Math.round(diffMs / 1000);
   const diffMin = Math.round(diffSec / 60);

@@ -167,7 +167,7 @@ export default function ProjectSprints() {
                   </div>
                   <p className="mt-1 text-sm text-slate-500">{sprint.goal}</p>
                   <p className="mt-1 text-xs text-slate-400">
-                    {formatDate(sprint.startDate)} — {formatDate(sprint.endDate)}
+                    {formatDate(sprint.startDate)} to {formatDate(sprint.endDate)}
                   </p>
                 </div>
                 <div className="flex flex-none items-center gap-2">

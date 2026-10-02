@@ -32,10 +32,13 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-brand-50 via-slate-50 to-slate-100 px-4 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-brand-300/30 blur-3xl dark:bg-brand-600/20" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-violet-300/30 blur-3xl dark:bg-violet-700/20" />
-
+    <div className="relative flex min-h-screen items-center justify-center bg-[#F6F7F4] px-4 dark:bg-slate-950">
+      <Link
+        to="/"
+        className="absolute left-4 top-4 text-sm font-medium text-[#5B6573] hover:text-[#15181E] dark:text-slate-400 dark:hover:text-slate-200"
+      >
+        DevPilot AI
+      </Link>
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
@@ -47,10 +50,10 @@ export default function Login() {
         className="relative w-full max-w-sm"
       >
         <div className="mb-8 flex flex-col items-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-lg font-bold text-white shadow-lg shadow-brand-600/30">
+          <div className="flex h-11 w-11 items-center justify-center rounded-md bg-[#2F5FE0] text-lg font-bold text-white">
             D
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Sign in to DevPilot AI</h1>
+          <h1 className="font-['Manrope'] text-xl font-bold text-slate-900">Sign in to DevPilot AI</h1>
           <p className="text-sm text-slate-500">Your intelligent project management platform</p>
         </div>
 

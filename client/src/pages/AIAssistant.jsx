@@ -10,6 +10,7 @@ import Select from '../components/common/Select';
 import AIBadge from '../components/common/AIBadge';
 import RoleGate from '../components/common/RoleGate';
 import TypewriterText from '../components/common/TypewriterText';
+import { AIThinking, AIErrorBanner } from '../components/common/AIStatus';
 import { aiToast } from '../utils/aiToast';
 import { MANAGING_ROLES } from '../utils/roles';
 
@@ -22,16 +23,18 @@ function UserStoryTool({ projectId }) {
   const [featureDescription, setFeatureDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
 
   const generate = async () => {
     if (!featureDescription.trim()) return;
     setLoading(true);
+    setError('');
     try {
       const { data } = await aiService.generateUserStory({ projectId: projectId || undefined, featureDescription });
       setResult(data);
       aiToast('User story drafted');
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -54,9 +57,12 @@ function UserStoryTool({ projectId }) {
         Generate User Story
       </Button>
 
+      {loading && <AIThinking label="Drafting a user story with Gemini..." />}
+      {error && !loading && <AIErrorBanner message={error} onRetry={generate} />}
+
       {result && (
         <div className="space-y-3 rounded-lg border border-violet-100 bg-violet-50/40 p-4">
-          <AIBadge label="AI-generated draft — review and edit before saving" />
+          <AIBadge label="AI-generated draft. Review and edit before saving." tone="draft" />
           <p className="text-sm font-medium text-slate-800">
             <TypewriterText text={result.userStory} />
           </p>
@@ -96,16 +102,18 @@ function MeetingTool({ projectId }) {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
 
   const generate = async () => {
     if (!notes.trim()) return;
     setLoading(true);
+    setError('');
     try {
       const { data } = await aiService.summarizeMeeting({ projectId: projectId || undefined, notes });
       setResult(data);
       aiToast('Meeting summarized');
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -127,9 +135,12 @@ function MeetingTool({ projectId }) {
         Summarize with AI
       </Button>
 
+      {loading && <AIThinking label="Summarizing meeting notes with Gemini..." />}
+      {error && !loading && <AIErrorBanner message={error} onRetry={generate} />}
+
       {result && (
         <div className="space-y-3 rounded-lg border border-violet-100 bg-violet-50/40 p-4">
-          <AIBadge label="AI-generated draft — review and edit before saving" />
+          <AIBadge label="AI-generated draft. Review and edit before saving." tone="draft" />
           <p className="text-sm text-slate-700">
             <TypewriterText text={result.summary} />
           </p>
@@ -138,7 +149,7 @@ function MeetingTool({ projectId }) {
               {result.actionItems.map((item, i) => (
                 <li key={i}>
                   {item.description}
-                  {item.assigneeName && <span className="text-slate-400"> — {item.assigneeName}</span>}
+                  {item.assigneeName && <span className="text-slate-400"> · {item.assigneeName}</span>}
                   {item.deadline && <span className="text-slate-400"> (due {item.deadline})</span>}
                 </li>
               ))}
@@ -198,7 +209,7 @@ export default function AIAssistant() {
 
         <p className="text-xs text-slate-400">
           For the AI Sprint Planner, AI Bug Analyzer, and AI Risk Analysis, open a specific project's Sprints, Bugs, or
-          Overview tab — those tools work directly against that project's data.
+          Overview tab; those tools work directly against that project's data.
         </p>
       </div>
     </RoleGate>

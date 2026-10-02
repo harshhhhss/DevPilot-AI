@@ -107,7 +107,7 @@ export default function ProjectsList() {
                   <span className="text-xs font-medium text-slate-500">{project.progress}%</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span>Manager: {project.manager?.name || '—'}</span>
+                  <span>Manager: {project.manager?.name || 'Unassigned'}</span>
                   <span>Due {formatDate(project.endDate)}</span>
                 </div>
               </Card>

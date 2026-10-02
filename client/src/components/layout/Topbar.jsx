@@ -26,7 +26,7 @@ export default function Topbar({ onMenuClick, title }) {
         <button type="button" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden" onClick={onMenuClick}>
           <Menu size={20} />
         </button>
-        <h1 className="text-base font-semibold text-slate-900 sm:text-lg">{title}</h1>
+        <h1 className="font-['Manrope'] text-base font-bold text-slate-900 sm:text-lg">{title}</h1>
       </div>
 
       <div className="flex items-center gap-2">
